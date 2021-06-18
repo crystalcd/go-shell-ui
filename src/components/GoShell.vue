@@ -1,18 +1,21 @@
 <template>
-  <div id="xterm" class="xterm" />
+  <div ref="xterm" class="xterm" />
 </template>
 
 <script >
 import { Terminal } from "xterm";
 import "xterm/css/xterm.css";
 import { FitAddon } from "xterm-addon-fit";
-// import { AttachAddon } from "xterm-addon-attach";
 
 export default {
   props: {
     wsurl: {
       type: String,
-      default: "ws://localhost:8081/test?aaa",
+      default: "ws://localhost:8081/test",
+    },
+    addr: {
+      type: String,
+      default: "localhost:22",
     },
     username: {
       type: String,
@@ -24,6 +27,7 @@ export default {
     },
   },
   mounted() {
+    this.initTerm();
     this.initSocket();
   },
   beforeUnmount() {
@@ -39,18 +43,17 @@ export default {
       });
       const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
-      let container = document.getElementById("xterm");
-      container.style.height = window.innerHeight + "px";
-      term.open(container);
+
       fitAddon.fit();
-      term.focus();
+      //
       this.term = term;
       // 获取终端第一次自适应的rows和cols属性
       console.log(this.term.cols, this.term.rows);
-      // this.socket.send()
+      this.url = `${this.wsurl}?cols=${this.term.cols}&rows=${this.term.rows}&sshaddr=${this.addr}&sshuser=${this.username}&sshpassword=${this.password}`;
+
       // 监听窗口大小变化，设置xterm自适应浏览器大小
       window.onresize = () => {
-        container.style.height = window.innerHeight + "px";
+        // 重新填满
         fitAddon.fit();
       };
       this.term.onData((value) => {
@@ -72,7 +75,7 @@ export default {
       });
     },
     initSocket() {
-      this.socket = new WebSocket(this.wsurl);
+      this.socket = new WebSocket(this.url);
       this.socketOnClose();
       this.socketOnOpen();
       this.socketOnError();
@@ -86,7 +89,9 @@ export default {
     socketOnOpen() {
       this.socket.onopen = () => {
         console.log("socket 连接成功");
-        this.initTerm();
+        let container = this.$refs.xterm;
+        this.term.open(container);
+        this.term.focus();
       };
     },
     socketOnClose() {
@@ -104,4 +109,8 @@ export default {
 </script>
 
 <style>
+.xterm {
+  width: 100%;
+  height: 100%;
+}
 </style>

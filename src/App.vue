@@ -1,18 +1,23 @@
 <template>
-  <GoShell
-    :wsurl="'ws://localhost:8081/test'"
-    :username="'root'"
-    :password="'Password1!'"
-  ></GoShell>
+  <el-container>
+    <el-aside width="200px">Aside</el-aside>
+    <el-container>
+      <el-header>Header</el-header>
+      <el-main>
+        <MainShell></MainShell>
+        <div class="container"></div>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script>
-import GoShell from "./components/GoShell.vue";
+import MainShell from "./components/MainShell.vue";
 
 export default {
   name: "App",
   components: {
-    GoShell,
+    MainShell,
   },
 };
 </script>
